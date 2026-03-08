@@ -212,26 +212,38 @@ export function FloorPlan() {
             {tables.map((table) => {
               const cfg = statusConfig[table.status];
               return (
-                <motion.button
+                <motion.div
                   key={table.id}
-                  whileHover={editMode ? {} : { scale: 1.08 }}
-                  whileTap={editMode ? {} : { scale: 0.95 }}
-                  onClick={() => handleTableClick(table)}
-                  onPointerDown={(e) => handlePointerDown(e, table.id)}
-                  className={`absolute flex flex-col items-center justify-center border-2 transition-colors ${shapeClass[table.shape]} ${cfg.bg} ${cfg.border} hover:shadow-lg ${editMode ? 'cursor-grab active:cursor-grabbing z-10' : 'cursor-pointer'} ${dragging === table.id ? 'shadow-xl ring-2 ring-primary opacity-90' : ''}`}
+                  className="absolute"
                   style={{ left: `${table.x}%`, top: `${table.y}%` }}
                 >
-                  <span className="font-bold text-sm">T{table.number}</span>
-                  <span className="text-[10px] text-muted-foreground">{table.seats} seats</span>
-                  {table.status === 'occupied' && table.occupiedSince && (
-                    <span className="text-[10px] font-medium text-warning flex items-center gap-0.5 mt-0.5">
-                      <Clock className="h-2.5 w-2.5" />{timeSince(table.occupiedSince)}
-                    </span>
+                  {editMode && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeTable(table.id); }}
+                      className="absolute -top-2 -right-2 z-20 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   )}
-                  {table.guestName && table.status !== 'available' && (
-                    <span className="text-[9px] text-muted-foreground truncate max-w-full px-1">{table.guestName}</span>
-                  )}
-                </motion.button>
+                  <motion.button
+                    whileHover={editMode ? {} : { scale: 1.08 }}
+                    whileTap={editMode ? {} : { scale: 0.95 }}
+                    onClick={() => handleTableClick(table)}
+                    onPointerDown={(e) => handlePointerDown(e, table.id)}
+                    className={`flex flex-col items-center justify-center border-2 transition-colors ${shapeClass[table.shape]} ${cfg.bg} ${cfg.border} hover:shadow-lg ${editMode ? 'cursor-grab active:cursor-grabbing z-10' : 'cursor-pointer'} ${dragging === table.id ? 'shadow-xl ring-2 ring-primary opacity-90' : ''}`}
+                  >
+                    <span className="font-bold text-sm">T{table.number}</span>
+                    <span className="text-[10px] text-muted-foreground">{table.seats} seats</span>
+                    {table.status === 'occupied' && table.occupiedSince && (
+                      <span className="text-[10px] font-medium text-warning flex items-center gap-0.5 mt-0.5">
+                        <Clock className="h-2.5 w-2.5" />{timeSince(table.occupiedSince)}
+                      </span>
+                    )}
+                    {table.guestName && table.status !== 'available' && (
+                      <span className="text-[9px] text-muted-foreground truncate max-w-full px-1">{table.guestName}</span>
+                    )}
+                  </motion.button>
+                </motion.div>
               );
             })}
           </div>
