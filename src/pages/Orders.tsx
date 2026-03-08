@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useMenuItems, useCategories, useOrders as useDbOrders } from '@/hooks/useSupabaseData';
+import { useMenuItems, useCategories, useOrders as useDbOrders, useInvoices } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
