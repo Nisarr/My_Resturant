@@ -311,7 +311,7 @@ export function FloorPlan() {
               )}
 
               {selected.status === 'occupied' && (() => {
-                const tableOrder = orders.find(o => o.tableNumber === selected.number && !['completed', 'cancelled'].includes(o.status));
+                const tableOrder = orders.find(o => o.table_number === selected.number && !['completed', 'cancelled'].includes(o.status));
                 return (
                   <div className="space-y-3">
                     <div className="space-y-2 text-sm">
