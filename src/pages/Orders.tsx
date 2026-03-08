@@ -99,7 +99,21 @@ const OrdersPage = () => {
   const { data: menuItems, loading: menuLoading } = useMenuItems();
   const { data: categories, loading: catsLoading } = useCategories();
   const { orders, loading: ordersLoading, createOrder, updateOrderStatus } = useDbOrders();
+  const { createInvoice } = useInvoices();
 
+  const handleCompleteOrder = useCallback(async (order: any) => {
+    await createInvoice({
+      order_id: order.id,
+      customer_name: order.customer_name || null,
+      subtotal: Number(order.subtotal),
+      tax: Number(order.tax),
+      discount: Number(order.discount),
+      total: Number(order.total),
+      payment_method: 'cash',
+      paid: true,
+    });
+    toast.success('Invoice generated!');
+  }, [createInvoice]);
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [view, setView] = useState<'new' | 'list'>('new');
