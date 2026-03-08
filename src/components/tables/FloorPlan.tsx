@@ -68,6 +68,8 @@ export function FloorPlan() {
   const [seatForm, setSeatForm] = useState({ guestName: '', guestCount: '2' });
   const [editMode, setEditMode] = useState(false);
   const [dragging, setDragging] = useState<string | null>(null);
+  const [addDialog, setAddDialog] = useState(false);
+  const [newTable, setNewTable] = useState<{ seats: string; shape: RestaurantTable['shape'] }>({ seats: '4', shape: 'square' });
   const floorRef = useRef<HTMLDivElement>(null);
 
   const counts = {
