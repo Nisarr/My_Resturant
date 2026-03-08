@@ -157,6 +157,25 @@ export function useOrders() {
 
   useEffect(() => { refetch(); }, [refetch]);
 
+  // Realtime subscription for orders and order_items
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('orders-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        refetch();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => {
+        refetch();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, refetch]);
+
   const createOrder = useCallback(async (
     order: Omit<DbOrder, 'id' | 'created_at' | 'updated_at'>,
     items: Omit<DbOrderItem, 'id' | 'order_id'>[]
@@ -165,14 +184,12 @@ export function useOrders() {
     if (error || !data) return { error };
     const orderItems = items.map(i => ({ ...i, order_id: data.id }));
     await supabase.from('order_items').insert(orderItems);
-    await refetch();
     return { data, error: null };
-  }, [refetch]);
+  }, []);
 
   const updateOrderStatus = useCallback(async (id: string, status: string) => {
     await supabase.from('orders').update({ status }).eq('id', id);
-    await refetch();
-  }, [refetch]);
+  }, []);
 
   return { orders, loading, refetch, createOrder, updateOrderStatus };
 }
