@@ -9,7 +9,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const location = useLocation();
 
   return (
