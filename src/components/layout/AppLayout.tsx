@@ -21,10 +21,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             <SidebarTrigger />
             <div className="ml-auto flex items-center gap-3">
               <span className="text-sm text-muted-foreground hidden sm:block">
-                Welcome, <span className="font-medium text-foreground">{user?.name}</span>
+                Welcome, <span className="font-medium text-foreground">{profile?.display_name || 'User'}</span>
               </span>
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium text-primary">
-                {user?.name?.charAt(0)}
+                {(profile?.display_name || 'U').charAt(0)}
               </div>
             </div>
           </header>

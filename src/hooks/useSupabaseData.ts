@@ -194,7 +194,7 @@ export function useCustomers() {
   const result = useTable<DbCustomer>('customers', 'created_at');
 
   const addCustomer = useCallback(async (c: Partial<DbCustomer>) => {
-    const { error } = await supabase.from('customers').insert(c);
+    const { error } = await supabase.from('customers').insert([c] as any);
     if (!error) result.refetch();
     return { error };
   }, [result.refetch]);
