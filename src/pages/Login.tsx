@@ -1,20 +1,41 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { UtensilsCrossed, User, ShieldCheck } from 'lucide-react';
+import { UtensilsCrossed, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types';
+import { toast } from 'sonner';
 
 const Login = () => {
-  const [name, setName] = useState('');
-  const [role, setRole] = useState<UserRole>('cashier');
-  const { login } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn, signUp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) login(name.trim(), role);
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password, displayName || email);
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success('Account created! Check your email to confirm, or sign in if auto-confirm is enabled.');
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast.error(error.message);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,48 +60,60 @@ const Login = () => {
 
         <Card className="border-0 shadow-lg">
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Your Name</label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <div className="space-y-1.5">
+                  <Label>Display Name</Label>
+                  <Input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Your name"
+                    className="h-11"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <Label>Email</Label>
                 <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="h-12"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@restaurant.com"
+                  className="h-11"
+                  required
                   autoFocus
                 />
               </div>
 
-              <div className="space-y-3">
-                <label className="text-sm font-medium">Select Role</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {([
-                    { value: 'cashier' as UserRole, label: 'Cashier', icon: User, desc: 'Take orders & payments' },
-                    { value: 'admin' as UserRole, label: 'Admin', icon: ShieldCheck, desc: 'Full access & reports' },
-                  ]).map((r) => (
-                    <motion.button
-                      key={r.value}
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setRole(r.value)}
-                      className={`p-4 rounded-xl border-2 text-left transition-colors ${
-                        role === r.value
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/30'
-                      }`}
-                    >
-                      <r.icon className={`h-5 w-5 mb-2 ${role === r.value ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <div className="font-medium text-sm">{r.label}</div>
-                      <div className="text-xs text-muted-foreground">{r.desc}</div>
-                    </motion.button>
-                  ))}
-                </div>
+              <div className="space-y-1.5">
+                <Label>Password</Label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-11"
+                  required
+                  minLength={6}
+                />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base" disabled={!name.trim()}>
-                Sign In
+              <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
+                {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isSignUp ? 'Create Account' : 'Sign In'}
               </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+                <button
+                  type="button"
+                  className="text-primary font-medium hover:underline"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                >
+                  {isSignUp ? 'Sign In' : 'Sign Up'}
+                </button>
+              </p>
             </form>
           </CardContent>
         </Card>

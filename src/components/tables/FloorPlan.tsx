@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useOrders } from '@/contexts/OrderContext';
+import { useOrders as useDbOrders } from '@/hooks/useSupabaseData';
 
 export type TableStatus = 'available' | 'occupied' | 'reserved' | 'cleaning';
 
@@ -61,7 +61,11 @@ function timeSince(iso: string) {
 
 export function FloorPlan() {
   const navigate = useNavigate();
-  const { orders, setCurrentTable, setCurrentCustomerName } = useOrders();
+  const { orders } = useDbOrders();
+  // For navigating to orders page with table pre-filled we'll use URL params
+  const setCurrentTableForOrder = useCallback((tableNum: number, guestName: string) => {
+    navigate(`/orders?table=${tableNum}&customer=${encodeURIComponent(guestName)}`);
+  }, [navigate]);
   const [tables, setTables] = useState<RestaurantTable[]>(initialTables);
   const [selected, setSelected] = useState<RestaurantTable | null>(null);
   const [actionDialog, setActionDialog] = useState(false);
@@ -307,7 +311,7 @@ export function FloorPlan() {
               )}
 
               {selected.status === 'occupied' && (() => {
-                const tableOrder = orders.find(o => o.tableNumber === selected.number && !['completed', 'cancelled'].includes(o.status));
+                const tableOrder = orders.find(o => o.table_number === selected.number && !['completed', 'cancelled'].includes(o.status));
                 return (
                   <div className="space-y-3">
                     <div className="space-y-2 text-sm">
@@ -325,21 +329,21 @@ export function FloorPlan() {
                         <div className="space-y-1 max-h-32 overflow-y-auto">
                           {tableOrder.items.map(item => (
                             <div key={item.id} className="flex justify-between text-sm">
-                              <span className="truncate">{item.quantity}× {item.menuItemName}</span>
-                              <span className="font-medium text-muted-foreground">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                              <span className="truncate">{item.quantity}× {item.menu_item_name}</span>
+                              <span className="font-medium text-muted-foreground">${(Number(item.unit_price) * item.quantity).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
                         <div className="flex justify-between text-sm font-bold pt-1 border-t border-border">
                           <span>Total</span>
-                          <span>${tableOrder.total.toFixed(2)}</span>
+                          <span>${Number(tableOrder.total).toFixed(2)}</span>
                         </div>
                         <Button size="sm" variant="outline" className="w-full" onClick={() => { setActionDialog(false); navigate('/orders'); }}>
                           <ExternalLink className="h-3.5 w-3.5 mr-1" /> View in Orders
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" className="w-full" onClick={() => { setCurrentTable(selected.number); setCurrentCustomerName(selected.guestName || ''); setActionDialog(false); navigate('/orders'); }}>
+                      <Button size="sm" className="w-full" onClick={() => { setActionDialog(false); setCurrentTableForOrder(selected.number, selected.guestName || ''); }}>
                         <ShoppingCart className="h-4 w-4 mr-1" /> Create Order
                       </Button>
                     )}
