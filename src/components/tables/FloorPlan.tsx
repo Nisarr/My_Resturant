@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Clock, Check, X, Plus, Minus, Lock, Unlock } from 'lucide-react';
+import { Users, Clock, Check, X, Plus, Minus, Lock, Unlock, ShoppingCart, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,8 @@ function timeSince(iso: string) {
 }
 
 export function FloorPlan() {
+  const navigate = useNavigate();
+  const { orders, setCurrentTable, setCurrentCustomerName } = useOrders();
   const [tables, setTables] = useState<RestaurantTable[]>(initialTables);
   const [selected, setSelected] = useState<RestaurantTable | null>(null);
   const [actionDialog, setActionDialog] = useState(false);
@@ -251,15 +254,6 @@ export function FloorPlan() {
                 </div>
               </div>
 
-              {selected.status === 'occupied' && (
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Guest</span><span className="font-medium">{selected.guestName}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Party size</span><span className="font-medium">{selected.guestCount}</span></div>
-                  {selected.occupiedSince && <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-medium">{timeSince(selected.occupiedSince)}</span></div>}
-                </div>
-              )}
-
-              {/* Actions based on status */}
               {selected.status === 'available' && (
                 <div className="space-y-3">
                   <div><Label>Guest Name</Label><Input value={seatForm.guestName} onChange={e => setSeatForm(f => ({ ...f, guestName: e.target.value }))} placeholder="Walk-in" /></div>
@@ -271,11 +265,50 @@ export function FloorPlan() {
                 </div>
               )}
 
-              {selected.status === 'occupied' && (
-                <Button variant="outline" className="w-full" onClick={freeTable}>
-                  <Check className="h-4 w-4 mr-1" /> Free Table
-                </Button>
-              )}
+              {selected.status === 'occupied' && (() => {
+                const tableOrder = orders.find(o => o.tableNumber === selected.number && !['completed', 'cancelled'].includes(o.status));
+                return (
+                  <div className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Guest</span><span className="font-medium">{selected.guestName}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Party size</span><span className="font-medium">{selected.guestCount}</span></div>
+                      {selected.occupiedSince && <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-medium">{timeSince(selected.occupiedSince)}</span></div>}
+                    </div>
+
+                    {tableOrder ? (
+                      <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Active Order</span>
+                          <Badge variant="secondary" className="text-[10px]">{tableOrder.status}</Badge>
+                        </div>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {tableOrder.items.map(item => (
+                            <div key={item.id} className="flex justify-between text-sm">
+                              <span className="truncate">{item.quantity}× {item.menuItemName}</span>
+                              <span className="font-medium text-muted-foreground">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-between text-sm font-bold pt-1 border-t border-border">
+                          <span>Total</span>
+                          <span>${tableOrder.total.toFixed(2)}</span>
+                        </div>
+                        <Button size="sm" variant="outline" className="w-full" onClick={() => { setActionDialog(false); navigate('/orders'); }}>
+                          <ExternalLink className="h-3.5 w-3.5 mr-1" /> View in Orders
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button size="sm" className="w-full" onClick={() => { setCurrentTable(selected.number); setCurrentCustomerName(selected.guestName || ''); setActionDialog(false); navigate('/orders'); }}>
+                        <ShoppingCart className="h-4 w-4 mr-1" /> Create Order
+                      </Button>
+                    )}
+
+                    <Button variant="outline" className="w-full" onClick={freeTable}>
+                      <Check className="h-4 w-4 mr-1" /> Free Table
+                    </Button>
+                  </div>
+                );
+              })()}
 
               {selected.status === 'reserved' && (
                 <div className="space-y-3">
