@@ -351,6 +351,35 @@ export function FloorPlan() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Table Dialog */}
+      <Dialog open={addDialog} onOpenChange={setAddDialog}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Add New Table</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Seats</Label>
+              <Input type="number" min="1" max="12" value={newTable.seats} onChange={e => setNewTable(f => ({ ...f, seats: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Shape</Label>
+              <Select value={newTable.shape} onValueChange={(v: RestaurantTable['shape']) => setNewTable(f => ({ ...f, shape: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="round">Round</SelectItem>
+                  <SelectItem value="square">Square</SelectItem>
+                  <SelectItem value="rect">Rectangle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button className="w-full" onClick={addNewTable}>
+              <Plus className="h-4 w-4 mr-1" /> Add Table
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
