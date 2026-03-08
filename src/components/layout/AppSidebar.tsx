@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   UtensilsCrossed,
+  Grid3X3,
   FileText,
   DollarSign,
   Users,
@@ -33,6 +34,7 @@ import { Separator } from '@/components/ui/separator';
 const mainNav = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Orders', url: '/orders', icon: ShoppingCart },
+  { title: 'Tables', url: '/tables', icon: Grid3X3 },
   { title: 'Menu', url: '/menu', icon: UtensilsCrossed },
   { title: 'Invoices', url: '/invoices', icon: FileText },
 ];
