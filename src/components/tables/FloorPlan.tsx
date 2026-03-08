@@ -60,6 +60,8 @@ function timeSince(iso: string) {
 }
 
 export function FloorPlan() {
+  const navigate = useNavigate();
+  const { orders, setCurrentTable, setCurrentCustomerName } = useOrders();
   const [tables, setTables] = useState<RestaurantTable[]>(initialTables);
   const [selected, setSelected] = useState<RestaurantTable | null>(null);
   const [actionDialog, setActionDialog] = useState(false);
