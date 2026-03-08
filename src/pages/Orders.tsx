@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, X, ShoppingCart, Hash, User, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
