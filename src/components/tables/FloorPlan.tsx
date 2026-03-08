@@ -336,7 +336,7 @@ export function FloorPlan() {
                         </div>
                         <div className="flex justify-between text-sm font-bold pt-1 border-t border-border">
                           <span>Total</span>
-                          <span>${tableOrder.total.toFixed(2)}</span>
+                          <span>${Number(tableOrder.total).toFixed(2)}</span>
                         </div>
                         <Button size="sm" variant="outline" className="w-full" onClick={() => { setActionDialog(false); navigate('/orders'); }}>
                           <ExternalLink className="h-3.5 w-3.5 mr-1" /> View in Orders
