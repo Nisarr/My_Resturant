@@ -67,7 +67,10 @@ function OrderListView({ orders, updateOrderStatus, onComplete }: { orders: any[
               <div className="flex items-center justify-between">
                 <span className="font-bold">${Number(order.total).toFixed(2)}</span>
                 {next && (
-                  <Button size="sm" onClick={() => updateOrderStatus(order.id, next)}>
+                  <Button size="sm" onClick={async () => {
+                    await updateOrderStatus(order.id, next);
+                    if (next === 'completed') await onComplete(order);
+                  }}>
                     Move to {next}
                   </Button>
                 )}
