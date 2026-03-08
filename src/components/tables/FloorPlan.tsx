@@ -343,7 +343,7 @@ export function FloorPlan() {
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" className="w-full" onClick={() => { setCurrentTable(selected.number); setCurrentCustomerName(selected.guestName || ''); setActionDialog(false); navigate('/orders'); }}>
+                      <Button size="sm" className="w-full" onClick={() => { setActionDialog(false); setCurrentTableForOrder(selected.number, selected.guestName || ''); }}>
                         <ShoppingCart className="h-4 w-4 mr-1" /> Create Order
                       </Button>
                     )}
