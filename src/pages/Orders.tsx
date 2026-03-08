@@ -103,7 +103,7 @@ const OrdersPage = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentTable, setCurrentTable] = useState<string>(searchParams.get('table') || '');
   const [currentCustomerName, setCurrentCustomerName] = useState(searchParams.get('customer') || '');
-  const [currentCustomerName, setCurrentCustomerName] = useState('');
+  
 
   const filteredItems = activeCategory === 'all'
     ? menuItems.filter(i => i.available)
