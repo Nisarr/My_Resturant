@@ -23,7 +23,7 @@ interface CartItem {
 const TAX_RATE = 0.1;
 
 // Order list sub-component
-function OrderListView({ orders, updateOrderStatus }: { orders: any[]; updateOrderStatus: (id: string, status: string) => Promise<void> }) {
+function OrderListView({ orders, updateOrderStatus, onComplete }: { orders: any[]; updateOrderStatus: (id: string, status: string) => Promise<void>; onComplete: (order: any) => Promise<void> }) {
   const statusFlow = ['pending', 'preparing', 'served', 'completed'];
   const nextStatus = (s: string) => {
     const i = statusFlow.indexOf(s);
