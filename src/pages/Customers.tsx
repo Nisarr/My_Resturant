@@ -1,20 +1,22 @@
 import { motion } from 'framer-motion';
-import { Search, Mail, Phone, Star } from 'lucide-react';
+import { Search, Mail, Phone, Star, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { mockCustomers } from '@/data/mock-data';
+import { useCustomers } from '@/hooks/useSupabaseData';
 
 const CustomersPage = () => {
   const [search, setSearch] = useState('');
-  const filtered = mockCustomers.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const { data: customers, loading } = useCustomers();
+  const filtered = customers.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+
+  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">Customers</h1>
-        <p className="text-muted-foreground text-sm mt-1">{mockCustomers.length} registered customers</p>
+        <p className="text-muted-foreground text-sm mt-1">{customers.length} registered customers</p>
       </div>
 
       <div className="relative max-w-sm">
@@ -33,32 +35,35 @@ const CustomersPage = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm truncate">{c.name}</h3>
-                    <p className="text-xs text-muted-foreground">Since {new Date(c.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">Since {new Date(c.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg bg-muted p-2">
                     <p className="text-xs text-muted-foreground">Visits</p>
-                    <p className="font-bold text-sm">{c.visitCount}</p>
+                    <p className="font-bold text-sm">{c.visit_count}</p>
                   </div>
                   <div className="rounded-lg bg-muted p-2">
                     <p className="text-xs text-muted-foreground">Spent</p>
-                    <p className="font-bold text-sm">${c.totalSpent.toFixed(0)}</p>
+                    <p className="font-bold text-sm">${Number(c.total_spent).toFixed(0)}</p>
                   </div>
                   <div className="rounded-lg bg-primary/10 p-2">
                     <p className="text-xs text-muted-foreground">Points</p>
-                    <p className="font-bold text-sm text-primary">{c.loyaltyPoints}</p>
+                    <p className="font-bold text-sm text-primary">{c.loyalty_points}</p>
                   </div>
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   {c.email && <div className="flex items-center gap-1.5"><Mail className="h-3 w-3" />{c.email}</div>}
                   {c.phone && <div className="flex items-center gap-1.5"><Phone className="h-3 w-3" />{c.phone}</div>}
-                  <div className="flex items-center gap-1.5"><Star className="h-3 w-3" />Last visit: {c.lastVisit}</div>
+                  {c.last_visit && <div className="flex items-center gap-1.5"><Star className="h-3 w-3" />Last visit: {new Date(c.last_visit).toLocaleDateString()}</div>}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         ))}
+        {filtered.length === 0 && !loading && (
+          <p className="col-span-full text-center text-muted-foreground py-10">No customers found</p>
+        )}
       </div>
     </div>
   );

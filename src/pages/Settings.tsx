@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { Moon, Sun, Store } from 'lucide-react';
 
 const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, profile, role } = useAuth();
   const { isDark, toggle } = useTheme();
 
   return (
@@ -49,8 +48,8 @@ const SettingsPage = () => {
       <Card className="border-0 shadow-sm">
         <CardHeader><CardTitle className="text-lg font-semibold font-sans">Account</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{user?.name}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Role</span><span className="font-medium capitalize">{user?.role}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{profile?.display_name || 'N/A'}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Role</span><span className="font-medium capitalize">{role}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{user?.email}</span></div>
         </CardContent>
       </Card>
@@ -59,10 +58,7 @@ const SettingsPage = () => {
         <CardHeader><CardTitle className="text-lg font-semibold font-sans">Keyboard Shortcuts</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm">
-            {[
-              ['F2', 'New Order'],
-              ['Esc', 'Clear / Cancel'],
-            ].map(([key, action]) => (
+            {[['F2', 'New Order'], ['Esc', 'Clear / Cancel']].map(([key, action]) => (
               <div key={key} className="flex items-center justify-between">
                 <span className="text-muted-foreground">{action}</span>
                 <kbd className="px-2 py-0.5 rounded bg-muted text-xs font-mono">{key}</kbd>

@@ -1,27 +1,25 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { categories as defaultCategories, menuItems as defaultMenuItems } from '@/data/mock-data';
-import { MenuItem, Category } from '@/types';
+import { useMenuItems, useCategories, type DbMenuItem } from '@/hooks/useSupabaseData';
 
 const MenuPage = () => {
-  const [items, setItems] = useState<MenuItem[]>(defaultMenuItems);
-  const [cats] = useState<Category[]>(defaultCategories);
+  const { data: items, loading: itemsLoading, addItem, updateItem, deleteItem } = useMenuItems();
+  const { data: cats, loading: catsLoading } = useCategories();
   const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch] = useState('');
-  const [editItem, setEditItem] = useState<MenuItem | null>(null);
+  const [editItem, setEditItem] = useState<DbMenuItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [form, setForm] = useState({ name: '', price: '', categoryId: '', description: '' });
 
   const filtered = items.filter(i => {
-    const matchCat = activeCategory === 'all' || i.categoryId === activeCategory;
+    const matchCat = activeCategory === 'all' || i.category_id === activeCategory;
     const matchSearch = i.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
@@ -32,37 +30,43 @@ const MenuPage = () => {
     setIsDialogOpen(true);
   };
 
-  const openEdit = (item: MenuItem) => {
+  const openEdit = (item: DbMenuItem) => {
     setEditItem(item);
-    setForm({ name: item.name, price: item.price.toString(), categoryId: item.categoryId, description: item.description || '' });
+    setForm({ name: item.name, price: item.price.toString(), categoryId: item.category_id || '', description: item.description || '' });
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.price) return;
     if (editItem) {
-      setItems(prev => prev.map(i => i.id === editItem.id ? { ...i, name: form.name, price: parseFloat(form.price), categoryId: form.categoryId, description: form.description } : i));
-    } else {
-      const newItem: MenuItem = {
-        id: `m-${Date.now()}`,
+      await updateItem(editItem.id, {
         name: form.name,
         price: parseFloat(form.price),
-        categoryId: form.categoryId,
-        description: form.description,
+        category_id: form.categoryId || null,
+        description: form.description || null,
+      });
+    } else {
+      await addItem({
+        name: form.name,
+        price: parseFloat(form.price),
+        category_id: form.categoryId || null,
+        description: form.description || null,
+        image: null,
         available: true,
-      };
-      setItems(prev => [...prev, newItem]);
+      });
     }
     setIsDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+  const handleDelete = async (id: string) => {
+    await deleteItem(id);
   };
 
-  const toggleAvailability = (id: string) => {
-    setItems(prev => prev.map(i => i.id === id ? { ...i, available: !i.available } : i));
+  const toggleAvailability = async (item: DbMenuItem) => {
+    await updateItem(item.id, { available: !item.available });
   };
+
+  if (itemsLoading || catsLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-4">
@@ -97,12 +101,12 @@ const MenuPage = () => {
                   <div>
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-sm">{item.name}</h3>
-                      <span className="font-bold text-primary text-sm">${item.price.toFixed(2)}</span>
+                      <span className="font-bold text-primary text-sm">${Number(item.price).toFixed(2)}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{cats.find(c => c.id === item.categoryId)?.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{cats.find(c => c.id === item.category_id)?.name}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={() => toggleAvailability(item.id)}>
+                    <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={() => toggleAvailability(item)}>
                       {item.available ? 'Available' : 'Unavailable'}
                     </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)}><Pencil className="h-3 w-3" /></Button>
@@ -114,6 +118,8 @@ const MenuPage = () => {
           ))}
         </AnimatePresence>
       </div>
+
+      {items.length === 0 && <p className="text-center text-muted-foreground py-10">No menu items yet. Add your first item!</p>}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

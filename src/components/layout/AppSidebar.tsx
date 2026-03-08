@@ -49,7 +49,7 @@ const managementNav = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { user, logout, isAdmin } = useAuth();
+  const { profile, role, isAdmin, signOut } = useAuth();
   const { isDark, toggle } = useTheme();
   const location = useLocation();
 
@@ -63,7 +63,6 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        {/* Brand */}
         <div className="p-4 flex items-center gap-3">
           <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
             <UtensilsCrossed className="h-5 w-5 text-primary-foreground" />
@@ -71,7 +70,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div>
               <h2 className="text-base font-semibold leading-none font-sans">RestoCafe</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">{user?.role === 'admin' ? 'Admin' : 'Cashier'}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{profile?.display_name || role}</p>
             </div>
           )}
         </div>
@@ -120,7 +119,7 @@ export function AppSidebar() {
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           {!collapsed && <span className="ml-2">{isDark ? 'Light mode' : 'Dark mode'}</span>}
         </Button>
-        <Button variant="ghost" size={collapsed ? 'icon' : 'sm'} className="w-full justify-start text-destructive hover:text-destructive" onClick={logout}>
+        <Button variant="ghost" size={collapsed ? 'icon' : 'sm'} className="w-full justify-start text-destructive hover:text-destructive" onClick={signOut}>
           <LogOut className="h-4 w-4" />
           {!collapsed && <span className="ml-2">Logout</span>}
         </Button>
