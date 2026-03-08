@@ -61,7 +61,11 @@ function timeSince(iso: string) {
 
 export function FloorPlan() {
   const navigate = useNavigate();
-  const { orders, setCurrentTable, setCurrentCustomerName } = useOrders();
+  const { orders } = useDbOrders();
+  // For navigating to orders page with table pre-filled we'll use URL params
+  const setCurrentTableForOrder = useCallback((tableNum: number, guestName: string) => {
+    navigate(`/orders?table=${tableNum}&customer=${encodeURIComponent(guestName)}`);
+  }, [navigate]);
   const [tables, setTables] = useState<RestaurantTable[]>(initialTables);
   const [selected, setSelected] = useState<RestaurantTable | null>(null);
   const [actionDialog, setActionDialog] = useState(false);
