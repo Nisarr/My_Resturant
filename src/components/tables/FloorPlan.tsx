@@ -254,6 +254,17 @@ export function FloorPlan() {
                 </div>
               </div>
 
+              {selected.status === 'available' && (
+                <div className="space-y-3">
+                  <div><Label>Guest Name</Label><Input value={seatForm.guestName} onChange={e => setSeatForm(f => ({ ...f, guestName: e.target.value }))} placeholder="Walk-in" /></div>
+                  <div><Label>Party Size</Label><Input type="number" min="1" max={selected.seats} value={seatForm.guestCount} onChange={e => setSeatForm(f => ({ ...f, guestCount: e.target.value }))} /></div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1" onClick={seatGuests}><Users className="h-4 w-4 mr-1" /> Seat Guests</Button>
+                    <Button variant="outline" className="flex-1" onClick={markReserved}>Reserve</Button>
+                  </div>
+                </div>
+              )}
+
               {selected.status === 'occupied' && (() => {
                 const tableOrder = orders.find(o => o.tableNumber === selected.number && !['completed', 'cancelled'].includes(o.status));
                 return (
